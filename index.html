@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -18,36 +18,50 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .user-info {
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
             margin-top: 20px;
+        }
+        .user-card {
             padding: 15px;
             background-color: #e9f7ef;
             border-radius: 5px;
+            position: relative;
         }
-        .admin-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8d7da;
-            border-radius: 5px;
-            display: none;
+        .current-user {
+            background-color: #d4edda;
+            border: 2px solid #28a745;
         }
-        .reputation-history {
-            margin-top: 20px;
-        }
-        .reputation-item {
-            padding: 10px;
-            margin-bottom: 5px;
-            background-color: #f8f9fa;
-            border-radius: 3px;
+        .controls {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
         }
         button {
             padding: 5px 10px;
-            margin: 0 5px;
+            margin: 3px;
             cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
         input {
             padding: 8px;
             margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .login-form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
         }
         .password-dialog {
             display: none;
@@ -58,57 +72,57 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
             z-index: 1000;
+        }
+        .admin-mode {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
+    <div id="admin-mode" class="admin-mode" style="display: none;">Режим администратора</div>
+
     <div class="container">
-        <div id="login-form">
-            <h2>Введите ваше имя</h2>
+        <div class="login-form" id="login-form">
+            <h2>Вход в систему</h2>
             <input type="text" id="username-input" placeholder="Ваше имя">
             <button onclick="login()">Войти</button>
+            <button onclick="showPasswordDialog()">Ввести пароль</button>
         </div>
 
-        <div id="user-info" class="user-info" style="display: none;">
-            <h2>Информация о пользователе</h2>
-            <p>Имя: <span id="display-name"></span></p>
-            <p>Репутация: <span id="reputation">10</span> очков</p>
-            <button id="admin-btn" onclick="showPasswordDialog()">Редактировать репутацию</button>
-        </div>
-
-        <div id="admin-panel" class="admin-panel">
-            <h2>Панель администратора</h2>
-            <p>Текущая репутация: <span id="admin-reputation"></span></p>
-            <button onclick="changeReputation(1)">+1</button>
-            <button onclick="changeReputation(-1)">-1</button>
-            <button onclick="changeReputation(5)">+5</button>
-            <button onclick="changeReputation(-5)">-5</button>
-            <button onclick="resetReputation()">Сбросить</button>
-        </div>
-
-        <div id="reputation-history" class="reputation-history" style="display: none;">
-            <h3>История репутации</h3>
-            <div id="history-items"></div>
+        <h2>Все пользователи системы</h2>
+        <div class="user-list" id="user-list">
+            <!-- Сюда будут добавляться карточки пользователей -->
         </div>
     </div>
 
     <div id="password-dialog" class="password-dialog">
-        <h3>Введите пароль для доступа</h3>
+        <h3>Введите пароль для изменения репутации</h3>
         <input type="password" id="password-input" placeholder="Пароль">
-        <button onclick="checkPassword()">Проверить</button>
+        <button onclick="checkPassword()">Подтвердить</button>
         <button onclick="hidePasswordDialog()">Отмена</button>
         <p id="password-error" style="color: red; display: none;">Неверный пароль!</p>
     </div>
 
     <script>
-        // Проверяем, есть ли сохраненные данные
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            showUserInfo(user.name, user.reputation, user.history || []);
-        }
+        // Хранилище данных
+        let allUsers = JSON.parse(localStorage.getItem('allUsers')) || {};
+        let currentUser = null;
+        let editMode = false;
+        const PASSWORD = "732726";
+
+        // Инициализация при загрузке
+        window.onload = function() {
+            updateUserList();
+        };
 
         function login() {
             const username = document.getElementById('username-input').value.trim();
@@ -118,57 +132,23 @@
                 return;
             }
 
-            // Обычный пользователь
-            let user = { name: username, reputation: 10, history: [] };
-            
-            // Проверяем, есть ли сохраненные данные для этого пользователя
-            const savedUser = localStorage.getItem('user');
-            if (savedUser) {
-                const savedUserData = JSON.parse(savedUser);
-                if (savedUserData.name === username) {
-                    user = savedUserData;
-                }
+            // Создаем нового пользователя, если его нет
+            if (!allUsers[username]) {
+                allUsers[username] = {
+                    name: username,
+                    reputation: 10,
+                    history: [{
+                        date: new Date().toLocaleString(),
+                        action: 'Первоначальная репутация',
+                        change: '+10',
+                        newValue: 10
+                    }]
+                };
             }
-            
-            // Добавляем новую запись в историю, если это первый вход
-            if (user.history.length === 0) {
-                user.history.push({
-                    date: new Date().toLocaleString(),
-                    action: 'Первоначальная репутация',
-                    change: '+10',
-                    newValue: 10
-                });
-            }
-            
-            // Сохраняем данные
-            localStorage.setItem('user', JSON.stringify(user));
-            
-            // Показываем информацию
-            showUserInfo(user.name, user.reputation, user.history);
-        }
 
-        function showUserInfo(name, reputation, history) {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('user-info').style.display = 'block';
-            document.getElementById('reputation-history').style.display = 'block';
-            
-            document.getElementById('display-name').textContent = name;
-            document.getElementById('reputation').textContent = reputation;
-            
-            // Отображаем историю
-            const historyContainer = document.getElementById('history-items');
-            historyContainer.innerHTML = '';
-            
-            history.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.className = 'reputation-item';
-                historyItem.innerHTML = `
-                    <strong>${item.date}</strong><br>
-                    ${item.action}: ${item.change}<br>
-                    Новое значение: ${item.newValue}
-                `;
-                historyContainer.appendChild(historyItem);
-            });
+            currentUser = username;
+            saveData();
+            updateUserList();
         }
 
         function showPasswordDialog() {
@@ -184,28 +164,52 @@
         function checkPassword() {
             const password = document.getElementById('password-input').value;
             
-            if (password === '732726') {
+            if (password === PASSWORD) {
+                editMode = true;
+                document.getElementById('admin-mode').style.display = 'block';
                 hidePasswordDialog();
-                document.getElementById('admin-panel').style.display = 'block';
-                
-                const savedUser = localStorage.getItem('user');
-                if (savedUser) {
-                    const user = JSON.parse(savedUser);
-                    document.getElementById('admin-reputation').textContent = user.reputation;
-                }
+                updateUserList();
             } else {
                 document.getElementById('password-error').style.display = 'block';
             }
         }
 
-        function changeReputation(change) {
-            const savedUser = localStorage.getItem('user');
-            if (!savedUser) return;
-            
-            const user = JSON.parse(savedUser);
+        function updateUserList() {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+
+            for (const username in allUsers) {
+                const user = allUsers[username];
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                if (username === currentUser) {
+                    userCard.classList.add('current-user');
+                }
+
+                userCard.innerHTML = `
+                    <h3>${user.name}</h3>
+                    <p>Репутация: <strong>${user.reputation}</strong> очков</p>
+                    <p>Последнее изменение: ${user.history[user.history.length-1].date}</p>
+                    <div class="controls">
+                        ${editMode ? `
+                            <button onclick="changeReputation('${username}', 1)">+1</button>
+                            <button onclick="changeReputation('${username}', -1)">-1</button>
+                            <button onclick="changeReputation('${username}', 5)">+5</button>
+                            <button onclick="changeReputation('${username}', -5)">-5</button>
+                        ` : 'Для изменения введите пароль'}
+                    </div>
+                `;
+
+                userList.appendChild(userCard);
+            }
+        }
+
+        function changeReputation(username, change) {
+            if (!editMode) return;
+
+            const user = allUsers[username];
             user.reputation += change;
             
-            // Добавляем запись в историю
             user.history.push({
                 date: new Date().toLocaleString(),
                 action: 'Изменение репутации',
@@ -213,41 +217,13 @@
                 newValue: user.reputation
             });
             
-            // Сохраняем обновленные данные
-            localStorage.setItem('user', JSON.stringify(user));
-            
-            // Обновляем отображение
-            document.getElementById('reputation').textContent = user.reputation;
-            document.getElementById('admin-reputation').textContent = user.reputation;
-            showUserInfo(user.name, user.reputation, user.history);
+            saveData();
+            updateUserList();
         }
 
-        function resetReputation() {
-            const savedUser = localStorage.getItem('user');
-            if (!savedUser) return;
-            
-            const user = JSON.parse(savedUser);
-            const oldReputation = user.reputation;
-            user.reputation = 10;
-            
-            // Добавляем запись в историю
-            user.history.push({
-                date: new Date().toLocaleString(),
-                action: 'Сброс репутации',
-                change: `С ${oldReputation} до 10`,
-                newValue: 10
-            });
-            
-            // Сохраняем обновленные данные
-            localStorage.setItem('user', JSON.stringify(user));
-            
-            // Обновляем отображение
-            document.getElementById('reputation').textContent = '10';
-            document.getElementById('admin-reputation').textContent = '10';
-            showUserInfo(user.name, user.reputation, user.history);
+        function saveData() {
+            localStorage.setItem('allUsers', JSON.stringify(allUsers));
         }
     </script>
 </body>
-</html>
-
-<a href="content://ru.zdevs.zarchiver.external/storage/emulated/0/Movies/texzt.html">Открыть файл</a>
+    </html>
