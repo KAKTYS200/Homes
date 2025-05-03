@@ -6,6 +6,9 @@
     <title>Royal Reputation System</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Добавляем Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         :root {
             --primary: #6C4AB6;
@@ -475,58 +478,51 @@
     </div>
 
     <script>
-        // Хранилище данных с имитацией "серверной" синхронизации
-        let users = JSON.parse(localStorage.getItem('royalUsers')) || {};
+        // Конфигурация Firebase (замените на свою)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEXAMPLEEXAMPLEEXAMPLE",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project.firebaseio.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef1234567890"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let users = {};
         let currentUser = null;
         let isAdmin = false;
         const ADMIN_PASSWORD = "732726";
         let selectedUser = null;
         let isNewUser = false;
 
-        // Имитация синхронизации между устройствами
-        function syncData() {
+        // Загрузка данных из Firebase
+        function loadData() {
             document.getElementById('sync-icon').classList.add('fa-spin');
             document.getElementById('sync-text').textContent = "Синхронизация с королевским сервером...";
             
-            // В реальном приложении здесь был бы запрос к серверу
-            setTimeout(() => {
-                // Проверяем, есть ли данные в localStorage других "устройств"
-                const syncKey = 'royalUsersSync';
-                const lastSync = localStorage.getItem(syncKey);
-                const now = new Date().toISOString();
-                
-                // Если это "первое устройство", создаем синхронизационную метку
-                if (!lastSync) {
-                    localStorage.setItem(syncKey, now);
-                } else {
-                    // Имитируем получение данных с "сервера"
-                    const remoteData = localStorage.getItem('royalUsersRemote') || '{}';
-                    const remoteUsers = JSON.parse(remoteData);
-                    
-                    // Объединяем данные
-                    users = {...remoteUsers, ...users};
-                    localStorage.setItem('royalUsers', JSON.stringify(users));
-                    localStorage.setItem('royalUsersRemote', JSON.stringify(users));
-                    localStorage.setItem(syncKey, now);
-                }
-                
+            database.ref('users').on('value', (snapshot) => {
+                users = snapshot.val() || {};
                 document.getElementById('sync-icon').classList.remove('fa-spin');
                 document.getElementById('sync-text').textContent = "Королевство синхронизировано";
                 
                 if (currentUser) {
                     updateUserList();
                 }
-            }, 1500);
+            });
         }
 
         // Проверка активного пользователя при загрузке
         window.onload = function() {
-            syncData();
+            loadData();
             const activeUser = localStorage.getItem('royalActiveUser');
-            if (activeUser && users[activeUser]) {
+            if (activeUser) {
                 currentUser = activeUser;
                 showUserSection();
-                updateUserList();
             }
         };
 
@@ -545,7 +541,7 @@
                 return;
             }
             
-            users[username] = {
+            const newUser = {
                 username,
                 password,
                 reputation: 10,
@@ -558,12 +554,15 @@
                 createdAt: new Date().toISOString()
             };
             
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            syncData();
-            
-            alert(`Добро пожаловать в королевство, ${username}!`);
-            document.getElementById('reg-username').value = '';
-            document.getElementById('reg-password').value = '';
+            database.ref('users/' + username).set(newUser)
+                .then(() => {
+                    alert(`Добро пожаловать в королевство, ${username}!`);
+                    document.getElementById('reg-username').value = '';
+                    document.getElementById('reg-password').value = '';
+                })
+                .catch(error => {
+                    alert('Ошибка регистрации: ' + error.message);
+                });
         }
 
         // Вход пользователя
@@ -584,8 +583,6 @@
             currentUser = username;
             localStorage.setItem('royalActiveUser', username);
             showUserSection();
-            updateUserList();
-            syncData();
         }
 
         // Выход из системы
@@ -602,6 +599,7 @@
             document.getElementById('auth-section').style.display = 'none';
             document.getElementById('user-section').style.display = 'block';
             document.getElementById('admin-tab').style.display = users[currentUser]?.password === ADMIN_PASSWORD ? 'block' : 'none';
+            updateUserList();
         }
 
         // Обновление списка пользователей
@@ -725,9 +723,9 @@
                     return;
                 }
                 
-                users[username] = {
+                const newUser = {
                     username,
-                    password: password || users[username]?.password || '',
+                    password,
                     reputation,
                     history: [{
                         date: new Date().toLocaleString(),
@@ -737,32 +735,68 @@
                     }],
                     createdAt: new Date().toISOString()
                 };
+                
+                database.ref('users/' + username).set(newUser)
+                    .then(() => {
+                        hideEditModal();
+                    })
+                    .catch(error => {
+                        alert('Ошибка сохранения: ' + error.message);
+                    });
             } else {
+                const updates = {};
                 const oldRep = users[selectedUser].reputation;
-                users[selectedUser].reputation = reputation;
-                users[selectedUser].history.push({
-                    date: new Date().toLocaleString(),
-                    action: 'Королевский указ',
-                    change: `С ${oldRep} на ${reputation}`,
-                    newValue: reputation
-                });
                 
                 // Если изменили имя
                 if (selectedUser !== username) {
-                    users[username] = {...users[selectedUser], username};
-                    delete users[selectedUser];
+                    // Удаляем старую запись
+                    database.ref('users/' + selectedUser).remove();
+                    
+                    // Создаем новую запись
+                    updates['users/' + username] = {
+                        ...users[selectedUser],
+                        username,
+                        reputation,
+                        history: [
+                            ...users[selectedUser].history,
+                            {
+                                date: new Date().toLocaleString(),
+                                action: 'Королевский указ',
+                                change: `С ${oldRep} на ${reputation}`,
+                                newValue: reputation
+                            }
+                        ]
+                    };
                     
                     if (currentUser === selectedUser) {
                         currentUser = username;
                         localStorage.setItem('royalActiveUser', username);
                     }
+                } else {
+                    // Обновляем только репутацию
+                    updates['users/' + username] = {
+                        ...users[username],
+                        reputation,
+                        history: [
+                            ...users[username].history,
+                            {
+                                date: new Date().toLocaleString(),
+                                action: 'Королевский указ',
+                                change: `С ${oldRep} на ${reputation}`,
+                                newValue: reputation
+                            }
+                        ]
+                    };
                 }
+                
+                database.ref().update(updates)
+                    .then(() => {
+                        hideEditModal();
+                    })
+                    .catch(error => {
+                        alert('Ошибка сохранения: ' + error.message);
+                    });
             }
-            
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            syncData();
-            hideEditModal();
-            updateUserList();
         }
 
         // Удалить пользователя
@@ -776,19 +810,14 @@
                 return;
             }
             
-            delete users[selectedUser];
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            syncData();
-            hideEditModal();
-            updateUserList();
+            database.ref('users/' + selectedUser).remove()
+                .then(() => {
+                    hideEditModal();
+                })
+                .catch(error => {
+                    alert('Ошибка удаления: ' + error.message);
+                });
         }
-
-        // Имитация синхронизации при взаимодействии с другими вкладками
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'royalUsersSync') {
-                syncData();
-            }
-        });
     </script>
 </body>
     </html>
