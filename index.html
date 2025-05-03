@@ -3,176 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система репутации</title>
+    <title>Royal Reputation System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #166088;
-            --accent-color: #4fc3f7;
-            --text-color: #333;
-            --light-bg: #f8f9fa;
-            --card-bg: #ffffff;
-            --border-radius: 8px;
-            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --primary: #6C4AB6;
+            --secondary: #8D72E1;
+            --accent: #B9E0FF;
+            --light: #F5F5F5;
+            --dark: #2D2727;
+            --success: #4CAF50;
+            --danger: #F44336;
+            --warning: #FFC107;
+            --crown: #FFD700;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
         }
-        
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--light-bg);
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 15px;
         }
-        
+
         header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 0;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
             text-align: center;
-            box-shadow: var(--box-shadow);
-        }
-        
-        h1, h2, h3 {
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-        }
-        
-        .auth-forms {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
             margin-bottom: 30px;
-        }
-        
-        @media (min-width: 768px) {
-            .auth-forms {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-        }
-        
-        .form-container {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            flex: 1;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 16px;
-        }
-        
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 100%;
-        }
-        
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        .btn-accent {
-            background-color: var(--accent-color);
-        }
-        
-        .btn-accent:hover {
-            background-color: #3da8d8;
-        }
-        
-        .user-list {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        @media (min-width: 576px) {
-            .user-list {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (min-width: 992px) {
-            .user-list {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        .user-card {
-            background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
             position: relative;
         }
-        
-        .current-user {
-            border: 2px solid var(--accent-color);
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
         }
-        
-        .controls {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #ddd;
+
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+
+        .auth-section {
             display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
-            gap: 5px;
         }
-        
-        .controls button {
-            flex: 1;
-            min-width: 60px;
-            padding: 5px;
+
+        .auth-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .auth-card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .user-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .current-user {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 0 3px rgba(108, 74, 182, 0.2);
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-rep {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 10px 0;
+        }
+
+        .user-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .controls .btn {
+            padding: 8px 12px;
             font-size: 14px;
+            flex: 1;
         }
-        
+
         .admin-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #dc3545;
+            top: 15px;
+            right: 15px;
+            background-color: var(--danger);
             color: white;
-            padding: 2px 8px;
-            border-radius: 15px;
+            padding: 3px 8px;
+            border-radius: 20px;
             font-size: 12px;
+            font-weight: bold;
         }
-        
+
+        .crown-icon {
+            color: var(--crown);
+            font-size: 1.2em;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -180,155 +243,286 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
-        
+
         .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: var(--border-radius);
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
             width: 90%;
-            max-width: 400px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            position: relative;
         }
-        
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
         .modal-footer {
             display: flex;
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
-        
-        .error-message {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .success-message {
-            color: #28a745;
-            font-size: 14px;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .user-stats {
+
+        .tab-container {
             display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
         }
-        
-        .stat-item {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .stat-label {
-            font-size: 12px;
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
             color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sync-status {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .sync-icon {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .user-list {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Королевские стили */
+        .royal-admin {
+            background: linear-gradient(135deg, #f5f7fa 0%, #fff9e6 100%);
+            border: 2px solid var(--crown);
+        }
+
+        .royal-header {
+            background: linear-gradient(to right, #6C4AB6, #8D72E1);
+            color: white;
+            padding: 15px;
+            border-radius: var(--radius) var(--radius) 0 0;
+            margin: -25px -25px 20px -25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .royal-header .crown-icon {
+            font-size: 1.8rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Система репутации</h1>
+            <h1><i class="fas fa-crown crown-icon"></i> Royal Reputation System</h1>
+            <p class="subtitle">Система репутации с королевскими привилегиями</p>
         </header>
-        
-        <div class="auth-forms">
-            <div class="form-container" id="register-form">
+
+        <div class="auth-section" id="auth-section">
+            <div class="auth-card">
                 <h2>Регистрация</h2>
                 <div class="form-group">
-                    <label for="reg-username">Логин:</label>
-                    <input type="text" id="reg-username" placeholder="Придумайте логин">
-                    <div class="error-message" id="reg-username-error"></div>
+                    <label for="reg-username">Логин</label>
+                    <input type="text" id="reg-username" placeholder="Придумайте королевское имя">
                 </div>
                 <div class="form-group">
-                    <label for="reg-password">Пароль:</label>
-                    <input type="password" id="reg-password" placeholder="Придумайте пароль">
-                    <div class="error-message" id="reg-password-error"></div>
+                    <label for="reg-password">Пароль</label>
+                    <input type="password" id="reg-password" placeholder="Секретный пароль">
                 </div>
-                <button class="btn-accent" onclick="register()">Зарегистрироваться</button>
-                <div class="success-message" id="reg-success"></div>
+                <button class="btn btn-accent" onclick="register()">Зарегистрироваться</button>
             </div>
-            
-            <div class="form-container" id="login-form">
-                <h2>Вход</h2>
+
+            <div class="auth-card">
+                <h2>Вход в систему</h2>
                 <div class="form-group">
-                    <label for="login-username">Логин:</label>
-                    <input type="text" id="login-username" placeholder="Ваш логин">
-                    <div class="error-message" id="login-username-error"></div>
+                    <label for="login-username">Логин</label>
+                    <input type="text" id="login-username" placeholder="Ваше королевское имя">
                 </div>
                 <div class="form-group">
-                    <label for="login-password">Пароль:</label>
-                    <input type="password" id="login-password" placeholder="Ваш пароль">
-                    <div class="error-message" id="login-password-error"></div>
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" placeholder="Ваш секретный пароль">
                 </div>
-                <button onclick="login()">Войти</button>
-                <div class="error-message" id="login-error"></div>
+                <button class="btn" onclick="login()">Войти в королевство</button>
+                <div class="sync-status" id="sync-status">
+                    <i class="fas fa-cloud sync-icon" id="sync-icon"></i>
+                    <span id="sync-text">Синхронизация с королевским сервером...</span>
+                </div>
             </div>
         </div>
-        
-        <div id="user-section" style="display: none;">
-            <h2>Все пользователи системы</h2>
-            <div class="user-list" id="user-list">
-                <!-- Сюда будут добавляться карточки пользователей -->
+
+        <div class="user-section" id="user-section">
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('users')">Подданные</div>
+                <div class="tab" onclick="switchTab('admin')" id="admin-tab">Королевский указ <i class="fas fa-crown crown-icon"></i></div>
+            </div>
+
+            <div class="tab-content active" id="users-tab">
+                <h2>Список подданных королевства</h2>
+                <div class="user-list" id="user-list"></div>
+            </div>
+
+            <div class="tab-content" id="admin-tab-content">
+                <div class="auth-card royal-admin">
+                    <div class="royal-header">
+                        <i class="fas fa-crown crown-icon"></i>
+                        <h2>Королевская панель управления</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Королевский пароль</label>
+                        <input type="password" id="admin-password" placeholder="Только для королевских особ">
+                    </div>
+                    <button class="btn btn-warning" onclick="activateAdmin()">Получить королевские полномочия</button>
+                    <div id="admin-controls" style="display: none; margin-top: 20px;">
+                        <h3>Королевские указы</h3>
+                        <button class="btn btn-danger" onclick="showEditModal(null, true)">
+                            <i class="fas fa-user-plus"></i> Создать нового подданного
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="modal" id="password-modal">
-        <div class="modal-content">
-            <h3>Административный доступ</h3>
-            <p>Для изменения репутации введите пароль администратора:</p>
-            <div class="form-group">
-                <input type="password" id="admin-password" placeholder="Пароль администратора">
-                <div class="error-message" id="password-error"></div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="hideModal()">Отмена</button>
-                <button class="btn-accent" onclick="checkAdminPassword()">Подтвердить</button>
-            </div>
-        </div>
-    </div>
-    
+
+    <!-- Модальное окно редактирования -->
     <div class="modal" id="edit-modal">
         <div class="modal-content">
-            <h3>Изменение репутации</h3>
-            <p>Пользователь: <span id="edit-username"></span></p>
+            <span class="close-modal" onclick="hideEditModal()">&times;</span>
+            <div class="royal-header">
+                <i class="fas fa-scroll crown-icon"></i>
+                <h2 id="edit-modal-title">Королевский указ</h2>
+            </div>
             <div class="form-group">
-                <label for="reputation-change">Изменение:</label>
-                <input type="number" id="reputation-change" placeholder="Введите число (+/-)">
+                <label for="edit-username">Имя подданного</label>
+                <input type="text" id="edit-username" placeholder="Имя подданного">
+            </div>
+            <div class="form-group">
+                <label for="edit-reputation">Репутация</label>
+                <input type="number" id="edit-reputation" placeholder="Королевская оценка">
+            </div>
+            <div class="form-group" id="edit-password-group">
+                <label for="edit-password">Пароль</label>
+                <input type="password" id="edit-password" placeholder="Новый пароль">
             </div>
             <div class="modal-footer">
-                <button onclick="hideEditModal()">Отмена</button>
-                <button class="btn-accent" onclick="applyReputationChange()">Применить</button>
+                <button class="btn btn-danger" id="delete-btn" style="display: none;" onclick="deleteUser()">
+                    <i class="fas fa-trash"></i> Изгнать из королевства
+                </button>
+                <button class="btn" onclick="hideEditModal()">Отменить</button>
+                <button class="btn btn-success" onclick="saveUserChanges()">
+                    <i class="fas fa-save"></i> Сохранить указ
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Хранилище данных
-        let users = JSON.parse(localStorage.getItem('users')) || {};
+        // Хранилище данных с имитацией "серверной" синхронизации
+        let users = JSON.parse(localStorage.getItem('royalUsers')) || {};
         let currentUser = null;
         let isAdmin = false;
         const ADMIN_PASSWORD = "732726";
-        let selectedUserForEdit = null;
+        let selectedUser = null;
+        let isNewUser = false;
 
-        // Инициализация при загрузке
+        // Имитация синхронизации между устройствами
+        function syncData() {
+            document.getElementById('sync-icon').classList.add('fa-spin');
+            document.getElementById('sync-text').textContent = "Синхронизация с королевским сервером...";
+            
+            // В реальном приложении здесь был бы запрос к серверу
+            setTimeout(() => {
+                // Проверяем, есть ли данные в localStorage других "устройств"
+                const syncKey = 'royalUsersSync';
+                const lastSync = localStorage.getItem(syncKey);
+                const now = new Date().toISOString();
+                
+                // Если это "первое устройство", создаем синхронизационную метку
+                if (!lastSync) {
+                    localStorage.setItem(syncKey, now);
+                } else {
+                    // Имитируем получение данных с "сервера"
+                    const remoteData = localStorage.getItem('royalUsersRemote') || '{}';
+                    const remoteUsers = JSON.parse(remoteData);
+                    
+                    // Объединяем данные
+                    users = {...remoteUsers, ...users};
+                    localStorage.setItem('royalUsers', JSON.stringify(users));
+                    localStorage.setItem('royalUsersRemote', JSON.stringify(users));
+                    localStorage.setItem(syncKey, now);
+                }
+                
+                document.getElementById('sync-icon').classList.remove('fa-spin');
+                document.getElementById('sync-text').textContent = "Королевство синхронизировано";
+                
+                if (currentUser) {
+                    updateUserList();
+                }
+            }, 1500);
+        }
+
+        // Проверка активного пользователя при загрузке
         window.onload = function() {
-            // Проверяем, есть ли активный пользователь в localStorage
-            const activeUser = localStorage.getItem('activeUser');
+            syncData();
+            const activeUser = localStorage.getItem('royalActiveUser');
             if (activeUser && users[activeUser]) {
                 currentUser = activeUser;
                 showUserSection();
@@ -336,256 +530,265 @@
             }
         };
 
-        function showError(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
-            return false;
-        }
-
-        function hideError(elementId) {
-            document.getElementById(elementId).style.display = 'none';
-            return true;
-        }
-
-        function showSuccess(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.style.display = 'block';
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 3000);
-        }
-
+        // Регистрация нового пользователя
         function register() {
             const username = document.getElementById('reg-username').value.trim();
             const password = document.getElementById('reg-password').value.trim();
             
-            // Валидация
-            let isValid = true;
-            
-            if (!username) {
-                isValid = showError('reg-username-error', 'Введите логин');
-            } else if (users[username]) {
-                isValid = showError('reg-username-error', 'Этот логин уже занят');
-            } else {
-                hideError('reg-username-error');
+            if (!username || !password) {
+                alert('Королевское имя и пароль обязательны!');
+                return;
             }
             
-            if (!password) {
-                isValid = showError('reg-password-error', 'Введите пароль');
-            } else if (password.length < 4) {
-                isValid = showError('reg-password-error', 'Пароль должен быть не менее 4 символов');
-            } else {
-                hideError('reg-password-error');
+            if (users[username]) {
+                alert('Это королевское имя уже занято!');
+                return;
             }
             
-            if (!isValid) return;
-            
-            // Регистрация нового пользователя
             users[username] = {
                 username,
                 password,
                 reputation: 10,
                 history: [{
                     date: new Date().toLocaleString(),
-                    action: 'Первоначальная репутация',
+                    action: 'Дарована королевская репутация',
                     change: '+10',
                     newValue: 10
                 }],
                 createdAt: new Date().toISOString()
             };
             
-            // Сохраняем данные
-            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('royalUsers', JSON.stringify(users));
+            syncData();
             
-            // Очищаем форму
+            alert(`Добро пожаловать в королевство, ${username}!`);
             document.getElementById('reg-username').value = '';
             document.getElementById('reg-password').value = '';
-            
-            // Показываем сообщение об успехе
-            showSuccess('reg-success', 'Регистрация прошла успешно! Теперь вы можете войти.');
         }
 
+        // Вход пользователя
         function login() {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value.trim();
             
-            // Валидация
-            let isValid = true;
-            
-            if (!username) {
-                isValid = showError('login-username-error', 'Введите логин');
-            } else if (!users[username]) {
-                isValid = showError('login-username-error', 'Пользователь не найден');
-            } else {
-                hideError('login-username-error');
+            if (!users[username]) {
+                alert('Подданный с таким именем не найден!');
+                return;
             }
             
-            if (!password) {
-                isValid = showError('login-password-error', 'Введите пароль');
-            } else if (users[username] && users[username].password !== password) {
-                isValid = showError('login-password-error', 'Неверный пароль');
-            } else {
-                hideError('login-password-error');
+            if (users[username].password !== password) {
+                alert('Неверный королевский пароль!');
+                return;
             }
             
-            if (!isValid) return;
-            
-            // Успешный вход
             currentUser = username;
-            localStorage.setItem('activeUser', username);
-            
-            // Очищаем форму
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-            hideError('login-error');
-            
-            // Показываем секцию пользователей
+            localStorage.setItem('royalActiveUser', username);
             showUserSection();
             updateUserList();
+            syncData();
         }
 
+        // Выход из системы
         function logout() {
             currentUser = null;
             isAdmin = false;
-            localStorage.removeItem('activeUser');
+            localStorage.removeItem('royalActiveUser');
             document.getElementById('user-section').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('auth-section').style.display = 'flex';
         }
 
+        // Показать секцию пользователей
         function showUserSection() {
+            document.getElementById('auth-section').style.display = 'none';
             document.getElementById('user-section').style.display = 'block';
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('admin-tab').style.display = users[currentUser]?.password === ADMIN_PASSWORD ? 'block' : 'none';
         }
 
+        // Обновление списка пользователей
         function updateUserList() {
             const userList = document.getElementById('user-list');
             userList.innerHTML = '';
-
-            // Сортируем пользователей по репутации (по убыванию)
-            const sortedUsers = Object.values(users).sort((a, b) => b.reputation - a.reputation);
             
-            for (const user of sortedUsers) {
+            Object.values(users).sort((a, b) => b.reputation - a.reputation).forEach(user => {
                 const userCard = document.createElement('div');
-                userCard.className = 'user-card';
-                if (user.username === currentUser) {
-                    userCard.classList.add('current-user');
-                }
-
-                const lastUpdate = user.history.length > 0 ? 
-                    new Date(user.history[user.history.length-1].date).toLocaleString() : 
-                    'нет данных';
-
+                userCard.className = `user-card ${user.username === currentUser ? 'current-user' : ''}`;
+                
                 userCard.innerHTML = `
-                    ${isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                    <h3>${user.username}</h3>
-                    <div class="user-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${user.reputation}</div>
-                            <div class="stat-label">Репутация</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${user.history.length}</div>
-                            <div class="stat-label">Изменений</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${new Date(user.createdAt).toLocaleDateString()}</div>
-                            <div class="stat-label">Дата регистрации</div>
-                        </div>
+                    ${user.password === ADMIN_PASSWORD ? '<div class="admin-badge"><i class="fas fa-crown"></i> Король</div>' : ''}
+                    <div class="user-name">
+                        ${user.username} ${user.password === ADMIN_PASSWORD ? '<i class="fas fa-crown crown-icon"></i>' : ''}
                     </div>
-                    <p><small>Последнее изменение: ${lastUpdate}</small></p>
-                    ${isAdmin ? `
-                        <div class="controls">
-                            <button onclick="showEditModal('${user.username}')">Изменить</button>
-                            <button onclick="resetReputation('${user.username}')">Сбросить</button>
-                        </div>
-                    ` : ''}
+                    <div class="user-rep">${user.reputation} <small>очков</small></div>
+                    <div class="user-meta">
+                        <span>Зарегистрирован: ${new Date(user.createdAt).toLocaleDateString()}</span>
+                        <span>Изменений: ${user.history.length}</span>
+                    </div>
+                    <div class="controls">
+                        ${isAdmin ? `
+                            <button class="btn btn-warning" onclick="showEditModal('${user.username}')">
+                                <i class="fas fa-edit"></i> Изменить
+                            </button>
+                        ` : ''}
+                        ${user.username === currentUser ? `
+                            <button class="btn btn-danger" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        ` : ''}
+                    </div>
                 `;
-
+                
                 userList.appendChild(userCard);
+            });
+        }
+
+        // Переключение между вкладками
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'users') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('users-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('admin-tab-content').classList.add('active');
             }
         }
 
-        function showModal() {
-            document.getElementById('password-modal').style.display = 'flex';
-            document.getElementById('admin-password').value = '';
-            document.getElementById('password-error').style.display = 'none';
-        }
-
-        function hideModal() {
-            document.getElementById('password-modal').style.display = 'none';
-        }
-
-        function showEditModal(username) {
-            selectedUserForEdit = username;
-            document.getElementById('edit-username').textContent = username;
-            document.getElementById('edit-modal').style.display = 'flex';
-            document.getElementById('reputation-change').value = '';
-        }
-
-        function hideEditModal() {
-            document.getElementById('edit-modal').style.display = 'none';
-        }
-
-        function checkAdminPassword() {
+        // Активация админ-панели
+        function activateAdmin() {
             const password = document.getElementById('admin-password').value;
             
             if (password === ADMIN_PASSWORD) {
                 isAdmin = true;
-                hideModal();
-                updateUserList();
+                document.getElementById('admin-controls').style.display = 'block';
+                alert('Королевские полномочия получены!');
             } else {
-                showError('password-error', 'Неверный пароль администратора');
+                alert('Неверный королевский пароль!');
             }
         }
 
-        function applyReputationChange() {
-            const change = parseInt(document.getElementById('reputation-change').value);
+        // Показать модальное окно редактирования
+        function showEditModal(username, isNew = false) {
+            selectedUser = username;
+            isNewUser = isNew;
             
-            if (isNaN(change)) {
-                alert('Введите числовое значение');
+            const modal = document.getElementById('edit-modal');
+            const title = document.getElementById('edit-modal-title');
+            const nameInput = document.getElementById('edit-username');
+            const repInput = document.getElementById('edit-reputation');
+            const passGroup = document.getElementById('edit-password-group');
+            const deleteBtn = document.getElementById('delete-btn');
+            
+            if (isNew) {
+                title.textContent = 'Создать нового подданного';
+                nameInput.value = '';
+                repInput.value = '10';
+                passGroup.style.display = 'block';
+                deleteBtn.style.display = 'none';
+            } else {
+                const user = users[username];
+                title.textContent = `Редактирование ${username}`;
+                nameInput.value = username;
+                repInput.value = user.reputation;
+                passGroup.style.display = 'none';
+                deleteBtn.style.display = username !== currentUser ? 'block' : 'none';
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // Скрыть модальное окно редактирования
+        function hideEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // Сохранить изменения пользователя
+        function saveUserChanges() {
+            const username = document.getElementById('edit-username').value.trim();
+            const reputation = parseInt(document.getElementById('edit-reputation').value);
+            const password = document.getElementById('edit-password')?.value.trim();
+            
+            if (!username) {
+                alert('Имя подданного обязательно!');
                 return;
             }
             
-            const user = users[selectedUserForEdit];
-            user.reputation += change;
+            if (isNaN(reputation)) {
+                alert('Репутация должна быть числом!');
+                return;
+            }
             
-            user.history.push({
-                date: new Date().toLocaleString(),
-                action: 'Ручное изменение',
-                change: change > 0 ? `+${change}` : change,
-                newValue: user.reputation
-            });
+            if (isNewUser) {
+                if (!password) {
+                    alert('Пароль обязателен для нового подданного!');
+                    return;
+                }
+                
+                users[username] = {
+                    username,
+                    password: password || users[username]?.password || '',
+                    reputation,
+                    history: [{
+                        date: new Date().toLocaleString(),
+                        action: 'Королевский указ',
+                        change: `Установлено ${reputation}`,
+                        newValue: reputation
+                    }],
+                    createdAt: new Date().toISOString()
+                };
+            } else {
+                const oldRep = users[selectedUser].reputation;
+                users[selectedUser].reputation = reputation;
+                users[selectedUser].history.push({
+                    date: new Date().toLocaleString(),
+                    action: 'Королевский указ',
+                    change: `С ${oldRep} на ${reputation}`,
+                    newValue: reputation
+                });
+                
+                // Если изменили имя
+                if (selectedUser !== username) {
+                    users[username] = {...users[selectedUser], username};
+                    delete users[selectedUser];
+                    
+                    if (currentUser === selectedUser) {
+                        currentUser = username;
+                        localStorage.setItem('royalActiveUser', username);
+                    }
+                }
+            }
             
-            saveData();
+            localStorage.setItem('royalUsers', JSON.stringify(users));
+            syncData();
             hideEditModal();
             updateUserList();
         }
 
-        function resetReputation(username) {
-            if (!confirm(`Сбросить репутацию пользователя ${username} до 10?`)) return;
+        // Удалить пользователя
+        function deleteUser() {
+            if (!confirm(`Изгнать ${selectedUser} из королевства? Это действие нельзя отменить!`)) {
+                return;
+            }
             
-            const user = users[username];
-            const oldReputation = user.reputation;
-            user.reputation = 10;
+            if (selectedUser === currentUser) {
+                alert('Вы не можете изгнать сами себя!');
+                return;
+            }
             
-            user.history.push({
-                date: new Date().toLocaleString(),
-                action: 'Сброс репутации',
-                change: `С ${oldReputation} до 10`,
-                newValue: 10
-            });
-            
-            saveData();
+            delete users[selectedUser];
+            localStorage.setItem('royalUsers', JSON.stringify(users));
+            syncData();
+            hideEditModal();
             updateUserList();
         }
 
-        function saveData() {
-            localStorage.setItem('users', JSON.stringify(users));
-        }
+        // Имитация синхронизации при взаимодействии с другими вкладками
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'royalUsersSync') {
+                syncData();
+            }
+        });
     </script>
 </body>
     </html>
