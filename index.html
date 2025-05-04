@@ -3,283 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royal Reputation System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Система авторизации</title>
     <style>
-        /* Все стили остаются такими же, как в вашем коде */
-        /* ... */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            display: none;
+        }
+        #login-form {
+            margin-top: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        #welcome-message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Весь HTML остается таким же, как в вашем коде -->
-    <!-- ... -->
+    <div id="login-form">
+        <h2>Введите ваше имя</h2>
+        <input type="text" id="username-input" placeholder="Ваше имя" required>
+        <button onclick="login()">Войти</button>
+        <p id="error-message" style="color: red;"></p>
+    </div>
+
+    <div id="user-container" class="container">
+        <h1 id="welcome-message"></h1>
+        <button onclick="logout()">Выйти</button>
+        <div id="user-list">
+            <h3>Зарегистрированные пользователи:</h3>
+            <ul id="users-list"></ul>
+        </div>
+    </div>
 
     <script>
-        // Конфигурация GitHub Gist
-        const GIST_ID = '39432c9492ee7840c8414fb2188a8fba'; // Замените на ID вашего Gist
-        const GIST_FILENAME = 'reputation_data.json';
-        const GITHUB_TOKEN = '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'; // Замените на ваш GitHub Personal Access Token
-        const ADMIN_PASSWORD = "732726";
-        
-        let users = {};
-        let currentUser = null;
-        let isAdmin = false;
-        let selectedUser = null;
-        let isNewUser = false;
+        // Проверяем, есть ли сохраненный пользователь
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                showUserInterface(savedUser);
+            }
+            updateUsersList();
+        });
 
-        // Загрузка данных из GitHub Gist
-        async function loadData() {
-            try {
-                document.getElementById('sync-icon').classList.add('fa-spin');
-                document.getElementById('sync-text').textContent = "Синхронизация с GitHub Gist...";
-                
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
-                if (!response.ok) throw new Error('Ошибка загрузки данных');
-                
-                const gistData = await response.json();
-                const content = gistData.files[GIST_FILENAME].content;
-                users = JSON.parse(content || '{}');
-                
-                document.getElementById('sync-icon').classList.remove('fa-spin');
-                document.getElementById('sync-text').textContent = "Данные загружены";
-                
-                if (currentUser) updateUserList();
-                return true;
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                document.getElementById('sync-icon').classList.remove('fa-spin');
-                document.getElementById('sync-text').textContent = "Ошибка загрузки данных";
-                return false;
-            }
-        }
+        // Функция входа
+        function login() {
+            const usernameInput = document.getElementById('username-input');
+            const errorMessage = document.getElementById('error-message');
+            const username = usernameInput.value.trim();
 
-        // Сохранение данных в GitHub Gist
-        async function saveData() {
-            try {
-                document.getElementById('sync-icon').classList.add('fa-spin');
-                document.getElementById('sync-text').textContent = "Сохранение данных...";
-                
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            [GIST_FILENAME]: {
-                                content: JSON.stringify(users, null, 2)
-                            }
-                        }
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Ошибка сохранения');
-                
-                document.getElementById('sync-icon').classList.remove('fa-spin');
-                document.getElementById('sync-text').textContent = "Данные сохранены";
-                return true;
-            } catch (error) {
-                console.error('Ошибка сохранения:', error);
-                document.getElementById('sync-icon').classList.remove('fa-spin');
-                document.getElementById('sync-text').textContent = "Ошибка сохранения данных";
-                return false;
-            }
-        }
-
-        // Инициализация при загрузке
-        window.onload = async function() {
-            // Пробуем загрузить данные сначала из localStorage
-            const localData = localStorage.getItem('royalUsers');
-            if (localData) users = JSON.parse(localData);
-            
-            // Затем синхронизируем с GitHub
-            await loadData();
-            
-            // Проверяем активного пользователя
-            const activeUser = localStorage.getItem('royalActiveUser');
-            if (activeUser && users[activeUser]) {
-                currentUser = activeUser;
-                showUserSection();
-                updateUserList();
-            }
-        };
-
-        // Регистрация нового пользователя
-        async function register() {
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value.trim();
-            
-            if (!username || !password) {
-                alert('Королевское имя и пароль обязательны!');
-                return;
-            }
-            
-            if (users[username]) {
-                alert('Это королевское имя уже занято!');
-                return;
-            }
-            
-            users[username] = {
-                username,
-                password,
-                reputation: 10,
-                history: [{
-                    date: new Date().toLocaleString(),
-                    action: 'Дарована королевская репутация',
-                    change: '+10',
-                    newValue: 10
-                }],
-                createdAt: new Date().toISOString()
-            };
-            
-            // Сохраняем локально
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            localStorage.setItem('royalActiveUser', username);
-            
-            // Синхронизируем с GitHub
-            const success = await saveData();
-            
-            if (success) {
-                alert(`Добро пожаловать в королевство, ${username}!`);
-                currentUser = username;
-                document.getElementById('reg-username').value = '';
-                document.getElementById('reg-password').value = '';
-                showUserSection();
-                updateUserList();
-            } else {
-                alert('Ошибка регистрации. Попробуйте позже.');
-                delete users[username];
-            }
-        }
-
-        // Вход пользователя
-        async function login() {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-            
-            // Сначала проверяем локальные данные
-            if (!users[username]) {
-                // Если пользователя нет локально, пробуем загрузить свежие данные
-                await loadData();
-            }
-            
-            if (!users[username]) {
-                alert('Подданный с таким именем не найден!');
-                return;
-            }
-            
-            if (users[username].password !== password) {
-                alert('Неверный королевский пароль!');
-                return;
-            }
-            
-            currentUser = username;
-            localStorage.setItem('royalActiveUser', username);
-            showUserSection();
-            updateUserList();
-        }
-
-        // Сохранение изменений пользователя
-        async function saveUserChanges() {
-            const username = document.getElementById('edit-username').value.trim();
-            const reputation = parseInt(document.getElementById('edit-reputation').value);
-            const password = document.getElementById('edit-password')?.value.trim();
-            
             if (!username) {
-                alert('Имя подданного обязательно!');
+                errorMessage.textContent = 'Пожалуйста, введите имя';
                 return;
             }
-            
-            if (isNaN(reputation)) {
-                alert('Репутация должна быть числом!');
-                return;
+
+            // Получаем список существующих пользователей
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Проверяем, есть ли пользователь в списке
+            const userExists = users.includes(username);
+
+            if (!userExists) {
+                // Добавляем нового пользователя
+                users.push(username);
+                localStorage.setItem('users', JSON.stringify(users));
             }
-            
-            if (isNewUser) {
-                if (!password) {
-                    alert('Пароль обязателен для нового подданного!');
-                    return;
-                }
-                
-                users[username] = {
-                    username,
-                    password,
-                    reputation,
-                    history: [{
-                        date: new Date().toLocaleString(),
-                        action: 'Королевский указ',
-                        change: `Установлено ${reputation}`,
-                        newValue: reputation
-                    }],
-                    createdAt: new Date().toISOString()
-                };
-            } else {
-                const oldRep = users[selectedUser].reputation;
-                users[selectedUser].reputation = reputation;
-                users[selectedUser].history.push({
-                    date: new Date().toLocaleString(),
-                    action: 'Королевский указ',
-                    change: `С ${oldRep} на ${reputation}`,
-                    newValue: reputation
-                });
-                
-                if (selectedUser !== username) {
-                    users[username] = {...users[selectedUser], username};
-                    delete users[selectedUser];
-                    
-                    if (currentUser === selectedUser) {
-                        currentUser = username;
-                        localStorage.setItem('royalActiveUser', username);
-                    }
-                }
-            }
-            
-            // Сохраняем локально
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            
-            // Синхронизируем с GitHub
-            const success = await saveData();
-            
-            if (success) {
-                hideEditModal();
-                updateUserList();
-            } else {
-                alert('Ошибка сохранения изменений. Попробуйте позже.');
-            }
+
+            // Сохраняем текущего пользователя
+            localStorage.setItem('currentUser', username);
+            showUserInterface(username);
+            updateUsersList();
         }
 
-        // Удаление пользователя
-        async function deleteUser() {
-            if (!confirm(`Изгнать ${selectedUser} из королевства? Это действие нельзя отменить!`)) {
-                return;
-            }
-            
-            if (selectedUser === currentUser) {
-                alert('Вы не можете изгнать сами себя!');
-                return;
-            }
-            
-            delete users[selectedUser];
-            
-            // Сохраняем локально
-            localStorage.setItem('royalUsers', JSON.stringify(users));
-            
-            // Синхронизируем с GitHub
-            const success = await saveData();
-            
-            if (success) {
-                hideEditModal();
-                updateUserList();
-            } else {
-                alert('Ошибка удаления пользователя. Попробуйте позже.');
-            }
+        // Функция выхода
+        function logout() {
+            localStorage.removeItem('currentUser');
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('user-container').style.display = 'none';
+            document.getElementById('username-input').value = '';
         }
 
-        // Остальные функции (showUserSection, updateUserList и т.д.) остаются без изменений
-        // ...
+        // Показать интерфейс пользователя
+        function showUserInterface(username) {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('user-container').style.display = 'block';
+            document.getElementById('welcome-message').textContent = `Добро пожаловать, ${username}!`;
+        }
+
+        // Обновить список пользователей
+        function updateUsersList() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const usersList = document.getElementById('users-list');
+            usersList.innerHTML = '';
+
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = user;
+                usersList.appendChild(li);
+            });
+        }
     </script>
 </body>
-    </html>
+</html>
