@@ -3,115 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система авторизации</title>
+    <title>Таблица репутации</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+        }
+        h1 {
             text-align: center;
+            color: #333;
         }
-        .container {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
         }
-        #login-form {
-            margin-top: 50px;
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 5px;
         }
-        input, button {
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        input[type="password"] {
+            width: 100%;
             padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-        }
-        #welcome-message {
-            font-size: 24px;
-            margin-bottom: 20px;
+            margin: 10px 0;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
-    <div id="login-form">
-        <h2>Введите ваше имя</h2>
-        <input type="text" id="username-input" placeholder="Ваше имя" required>
-        <button onclick="login()">Войти</button>
-        <p id="error-message" style="color: red;"></p>
-    </div>
-
-    <div id="user-container" class="container">
-        <h1 id="welcome-message"></h1>
-        <button onclick="logout()">Выйти</button>
-        <div id="user-list">
-            <h3>Зарегистрированные пользователи:</h3>
-            <ul id="users-list"></ul>
+    <h1>Таблица репутации</h1>
+    
+    <table id="reputationTable">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Репутация</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Сергей</td>
+                <td class="reputation">10</td>
+            </tr>
+            <tr>
+                <td>Артём</td>
+                <td class="reputation">10</td>
+            </tr>
+            <tr>
+                <td>Ваня</td>
+                <td class="reputation">10</td>
+            </tr>
+            <tr>
+                <td>Вадим</td>
+                <td class="reputation">10</td>
+            </tr>
+            <tr>
+                <td>Александр</td>
+                <td class="reputation">10</td>
+            </tr>
+            <tr>
+                <td>Денис</td>
+                <td class="reputation">10</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <button id="editButton">Редактировать репутацию</button>
+    
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Введите пароль</h2>
+            <input type="password" id="passwordInput" placeholder="Пароль">
+            <button id="submitPassword">Подтвердить</button>
+            <p id="errorMessage" style="color: red; display: none;">Неверный пароль!</p>
         </div>
     </div>
-
+    
     <script>
-        // Проверяем, есть ли сохраненный пользователь
+        // Получаем элементы
+        const editButton = document.getElementById('editButton');
+        const passwordModal = document.getElementById('passwordModal');
+        const closeButton = document.querySelector('.close');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitPassword = document.getElementById('submitPassword');
+        const errorMessage = document.getElementById('errorMessage');
+        const reputationCells = document.querySelectorAll('.reputation');
+        
+        // Загружаем сохраненные данные из localStorage
         document.addEventListener('DOMContentLoaded', function() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                showUserInterface(savedUser);
+            const savedReputations = JSON.parse(localStorage.getItem('reputations'));
+            if (savedReputations) {
+                reputationCells.forEach((cell, index) => {
+                    cell.textContent = savedReputations[index];
+                    cell.setAttribute('data-value', savedReputations[index]);
+                });
             }
-            updateUsersList();
         });
-
-        // Функция входа
-        function login() {
-            const usernameInput = document.getElementById('username-input');
-            const errorMessage = document.getElementById('error-message');
-            const username = usernameInput.value.trim();
-
-            if (!username) {
-                errorMessage.textContent = 'Пожалуйста, введите имя';
-                return;
+        
+        // Открываем модальное окно при нажатии на кнопку
+        editButton.addEventListener('click', function() {
+            passwordModal.style.display = 'block';
+        });
+        
+        // Закрываем модальное окно при нажатии на крестик
+        closeButton.addEventListener('click', function() {
+            passwordModal.style.display = 'none';
+            errorMessage.style.display = 'none';
+            passwordInput.value = '';
+        });
+        
+        // Проверяем пароль
+        submitPassword.addEventListener('click', function() {
+            if (passwordInput.value === '732726') {
+                passwordModal.style.display = 'none';
+                passwordInput.value = '';
+                errorMessage.style.display = 'none';
+                
+                // Делаем ячейки редактируемыми
+                reputationCells.forEach(cell => {
+                    cell.contentEditable = true;
+                    cell.style.backgroundColor = '#ffffcc';
+                });
+                
+                // Меняем кнопку на "Сохранить"
+                editButton.textContent = 'Сохранить';
+                editButton.removeEventListener('click', arguments.callee);
+                editButton.addEventListener('click', saveReputations);
+            } else {
+                errorMessage.style.display = 'block';
             }
-
-            // Получаем список существующих пользователей
-            let users = JSON.parse(localStorage.getItem('users')) || [];
-
-            // Проверяем, есть ли пользователь в списке
-            const userExists = users.includes(username);
-
-            if (!userExists) {
-                // Добавляем нового пользователя
-                users.push(username);
-                localStorage.setItem('users', JSON.stringify(users));
-            }
-
-            // Сохраняем текущего пользователя
-            localStorage.setItem('currentUser', username);
-            showUserInterface(username);
-            updateUsersList();
-        }
-
-        // Функция выхода
-        function logout() {
-            localStorage.removeItem('currentUser');
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('user-container').style.display = 'none';
-            document.getElementById('username-input').value = '';
-        }
-
-        // Показать интерфейс пользователя
-        function showUserInterface(username) {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('user-container').style.display = 'block';
-            document.getElementById('welcome-message').textContent = `Добро пожаловать, ${username}!`;
-        }
-
-        // Обновить список пользователей
-        function updateUsersList() {
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const usersList = document.getElementById('users-list');
-            usersList.innerHTML = '';
-
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.textContent = user;
-                usersList.appendChild(li);
+        });
+        
+        // Функция сохранения репутации
+        function saveReputations() {
+            const reputations = [];
+            
+            reputationCells.forEach(cell => {
+                cell.contentEditable = false;
+                cell.style.backgroundColor = '';
+                reputations.push(cell.textContent);
+            });
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('reputations', JSON.stringify(reputations));
+            
+            // Возвращаем кнопку в исходное состояние
+            editButton.textContent = 'Редактировать репутацию';
+            editButton.removeEventListener('click', saveReputations);
+            editButton.addEventListener('click', function() {
+                passwordModal.style.display = 'block';
             });
         }
     </script>
 </body>
-</html>
+        </html>
